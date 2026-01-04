@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GPT Calculator</title>
+<style>
+body{
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#0f172a;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.calculator{
+  background:#111827;
+  padding:20px;
+  border-radius:16px;
+  width:320px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+.display{
+  width:100%;
+  height:70px;
+  background:#020617;
+  color:#22c55e;
+  font-size:32px;
+  text-align:right;
+  padding:15px;
+  box-sizing:border-box;
+  border-radius:10px;
+  margin-bottom:15px;
+  overflow-x:auto;
+}
+
+.buttons{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+button{
+  height:60px;
+  border:none;
+  border-radius:12px;
+  font-size:22px;
+  cursor:pointer;
+  background:#1f2933;
+  color:white;
+}
+
+button:active{ transform:scale(0.95); }
+
+.op{ background:#2563eb; }
+.equal{
+  background:#22c55e;
+  color:black;
+  grid-column:span 2;
+}
+.clear{ background:#ef4444; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div id="display" class="display">0</div>
+
+  <div class="buttons">
+    <button class="clear" onclick="clearAll()">AC</button>
+    <button onclick="press('(')">(</button>
+    <button onclick="press(')')">)</button>
+    <button class="op" onclick="press('÷')">÷</button>
+
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button class="op" onclick="press('×')">×</button>
+
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button class="op" onclick="press('-')">−</button>
+
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button class="op" onclick="press('+')">+</button>
+
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button class="equal" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+let display = document.getElementById("display");
+let exp = "";
+
+function press(v){
+  // implicit multiplication fixes
+  if(
+    exp &&
+    (
+      (isNumber(last()) && v === '(') ||
+      (last() === ')' && isNumber(v))
+    )
+  ){
+    exp += '×';
+  }
+
+  if(display.innerText === "0") exp = "";
+  exp += v;
+  display.innerText = exp;
+}
+
+function last(){
+  return exp[exp.length-1];
+}
+
+function isNumber(c){
+  return "0123456789".includes(c);
+}
+
+function clearAll(){
+  exp = "";
+  display.innerText = "0";
+}
+
+function calculate(){
+  try{
+    let safe = exp
+      .replace(/×/g,"*")
+      .replace(/÷/g,"/")
+      .replace(/−/g,"-");
+
+    let result = Function("return "+safe)();
+    display.innerText = result;
+    exp = result.toString();
+  }catch{
+    display.innerText = "Error";
+    exp = "";
+  }
+}
+
+// keyboard
+document.addEventListener("keydown", e=>{
+  if("0123456789()+-.".includes(e.key)) press(e.key);
+  if(e.key === "*") press("×");
+  if(e.key === "/") press("÷");
+  if(e.key === "Enter") calculate();
+  if(e.key === "Backspace"){
+    exp = exp.slice(0,-1);
+    display.innerText = exp || "0";
+  }
+});
+</script>
+
+</body>
+</html>
